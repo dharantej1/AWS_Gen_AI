@@ -1170,3 +1170,317 @@ You have completed this notebook. Close this notebook file and continue with **T
 
 ---
 
+### Task 5: Invoke Bedrock Model for Code Generation
+
+In this notebook, you learn how to use a Large Language Model (LLM) to generate code based on a text prompt.
+
+The prompt used in this notebook is a zero-shot prompt, as we are not providing any examples of text other than the prompt itself.
+
+To demonstrate the code generation capability of models in Amazon Bedrock, you take the use case of code generation. You explore using the Boto3 client to communicate with the Amazon Bedrock API and provide the API with an input consisting of a task, an instruction, and an input for the model to generate an output without providing any additional example. The purpose here is to demonstrate how powerful LLMs can understand the task at hand and generate compelling outputs.
+
+#### Scenario
+
+You are Moe, a Data Analyst at AnyCompany. The company wants to understand its sales performance for different products over the past year. You have been provided a dataset named `sales.csv`. The dataset contains the following columns:
+
+- `date` (YYYY-MM-DD format)
+- `product_id` (unique identifier for each product)
+- `price` (price at which each product was sold)
+- `units_sold` (number of units sold)
+
+In this notebook, you learn how to generate code for a given prompt. You use the Meta Llama 3 model using the Amazon Bedrock API with the Boto3 client.
+
+### Task 5.1: Environment Setup
+
+In this task, you set up your environment.
+
+#### Code Cell 1:
+
+```python
+# Create a service client by name using the default session.
+import json
+import os
+import sys
+
+import boto3
+
+module_path = ".."
+sys.path.append(os.path.abspath(module_path))
+bedrock_client = boto3.client('bedrock-runtime', region_name=os.environ.get("AWS_DEFAULT_REGION", None))
+```
+
+**Explanation:** Initializes the environment by importing necessary libraries and creating a Bedrock client using Boto3. Modifies the system path to include the module directory.
+
+### Task 5.2: Code Generation
+
+In this task, you prepare an input for the Amazon Bedrock service to generate a Python program for your use case.
+
+#### Lab Setup - Create Sample `sales.csv` Data for This Lab
+
+#### Code Cell 2:
+
+```python
+# Create sales.csv file
+import csv
+
+data = [
+    ["date", "product_id", "price", "units_sold"],
+    ["2023-01-01", "P001", 50, 20],
+    ["2023-01-02", "P002", 60, 15],
+    ["2023-01-03", "P001", 50, 18],
+    ["2023-01-04", "P003", 70, 30],
+    ["2023-01-05", "P001", 50, 25],
+    ["2023-01-06", "P002", 60, 22],
+    ["2023-01-07", "P003", 70, 24],
+    ["2023-01-08", "P001", 50, 28],
+    ["2023-01-09", "P002", 60, 17],
+    ["2023-01-10", "P003", 70, 29],
+    ["2023-02-11", "P001", 50, 23],
+    ["2023-02-12", "P002", 60, 19],
+    ["2023-02-13", "P001", 50, 21],
+    ["2023-02-14", "P003", 70, 31],
+    ["2023-03-15", "P001", 50, 26],
+    ["2023-03-16", "P002", 60, 20],
+    ["2023-03-17", "P003", 70, 33],
+    ["2023-04-18", "P001", 50, 27],
+    ["2023-04-19", "P002", 60, 18],
+    ["2023-04-20", "P003", 70, 32],
+    ["2023-04-21", "P001", 50, 22],
+    ["2023-04-22", "P002", 60, 16],
+    ["2023-04-23", "P003", 70, 34],
+    ["2023-05-24", "P001", 50, 24],
+    ["2023-05-25", "P002", 60, 21]
+]
+
+# Write data to sales.csv
+with open('sales.csv', 'w', newline='') as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerows(data)
+
+print("sales.csv has been created!")
+```
+
+**Explanation:** Creates a sample `sales.csv` file with sales data to be used in this lab.
+
+**Output:**
+```
+sales.csv has been created!
+```
+
+### Task 5.3: Analyzing Sales with Amazon Bedrock Generated Python Program
+
+#### Code Cell 3:
+
+```python
+# Define prompt template
+from langchain_core.prompts import PromptTemplate
+
+def format_prompt(actor: str, input: str):
+    match actor:
+        case "user":
+            prompt_template =  """<|begin_of_text|><|start_header_id|>{actor}<|end_header_id|>\n\n{input}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n
+"""
+            prompt = PromptTemplate.from_template(prompt_template)
+            return prompt.format(actor=actor, input=input)
+        case _:
+            print("requested actor >" + actor + "< is not supported")
+            return ""   
+```
+
+**Explanation:** Defines a function to format the prompt appropriately for the Bedrock model, using a prompt template.
+
+#### Code Cell 4:
+
+```python
+# Create the prompt
+# Analyzing sales
+
+prompt_data = """
+
+You have a CSV, sales.csv, with columns:
+- date (YYYY-MM-DD)
+- product_id
+- price
+- units_sold
+
+Create a python program to analyze the sales data from a CSV file. The program should be able to read the data, and determine below:
+
+- Total revenue for the year
+- Total revenue by product 
+- The product with the highest revenue 
+- The date with the highest revenue and the revenue achieved on that date
+- Visualize monthly sales using a bar chart
+
+Ensure the code is syntactically correct, bug-free, optimized, not span multiple lines unnecessarily, and prefer to use standard libraries. Return only python code without any surrounding text, explanation, or context.
+
+"""
+prompt = format_prompt("user", prompt_data)
+```
+
+**Explanation:** Creates the prompt for the LLM, specifying the task and requirements for the generated code.
+
+#### Code Cell 5:
+
+```python
+body = json.dumps({
+    "prompt": prompt,
+    "max_gen_len": 2048,
+    "temperature": 0,
+    "top_p": 1,
+}) 
+```
+
+**Explanation:** Prepares the request body with the prompt and model parameters for the API call.
+
+### Task 5.4: Invoke the Model
+
+#### Code Cell 6:
+
+```python
+modelId = "meta.llama3-8b-instruct-v1:0"
+response = bedrock_client.invoke_model(body=body, modelId=modelId)
+response_body = json.loads(response.get('body').read())
+output_list = response_body.get("generation", [])
+print(output_list)
+```
+
+**Explanation:** Invokes the Bedrock model using the Boto3 client, passing in the prompt, and prints the generated code.
+
+**Output:**
+
+```python
+```
+import csv
+import datetime
+import matplotlib.pyplot as plt
+from collections import defaultdict
+
+def analyze_sales(file_name):
+    sales_data = []
+    with open(file_name, 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            sales_data.append({
+                'date': datetime.datetime.strptime(row['date'], '%Y-%m-%d').date(),
+                'product_id': row['product_id'],
+                'price': float(row['price']),
+                'units_sold': int(row['units_sold'])
+            })
+
+    total_revenue = sum(sale['price'] * sale['units_sold'] for sale in sales_data)
+    print(f'Total revenue for the year: {total_revenue}')
+
+    revenue_by_product = defaultdict(int)
+    for sale in sales_data:
+        revenue_by_product[sale['product_id']] += sale['price'] * sale['units_sold']
+    print('Total revenue by product:')
+    for product, revenue in revenue_by_product.items():
+        print(f'Product {product}: {revenue}')
+
+    max_revenue_product = max(revenue_by_product, key=revenue_by_product.get)
+    print(f'The product with the highest revenue: {max_revenue_product}')
+
+    max_revenue_date = max(sales_data, key=lambda x: x['price'] * x['units_sold'])
+    print(f'The date with the highest revenue: {max_revenue_date["date"]}, Revenue: {max_revenue_date["price"] * max_revenue_date["units_sold"]}')
+
+    monthly_sales = defaultdict(int)
+    for sale in sales_data:
+        monthly_sales[sale['date'].strftime('%Y-%m')] += sale['price'] * sale['units_sold']
+    months = list(monthly_sales.keys())
+    months.sort()
+    plt.bar(months, [monthly_sales[month] for month in months])
+    plt.xlabel('Month')
+    plt.ylabel('Revenue')
+    plt.title('Monthly Sales')
+    plt.show()
+
+analyze_sales('sales.csv')
+```
+```
+
+#### (Optional) Copy the generated code from the printed output and run the Bedrock generated code in the cell below for validation.
+
+#### Code Cell 7:
+
+```python
+import csv
+import datetime
+import matplotlib.pyplot as plt
+from collections import defaultdict
+
+def analyze_sales(file_name):
+    sales_data = []
+    with open(file_name, 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            sales_data.append({
+                'date': datetime.datetime.strptime(row['date'], '%Y-%m-%d').date(),
+                'product_id': row['product_id'],
+                'price': float(row['price']),
+                'units_sold': int(row['units_sold'])
+            })
+
+    total_revenue = sum(sale['price'] * sale['units_sold'] for sale in sales_data)
+    print(f'Total revenue for the year: {total_revenue}')
+
+    revenue_by_product = defaultdict(int)
+    for sale in sales_data:
+        revenue_by_product[sale['product_id']] += sale['price'] * sale['units_sold']
+    print('Total revenue by product:')
+    for product, revenue in revenue_by_product.items():
+        print(f'Product {product}: {revenue}')
+
+    max_revenue_product = max(revenue_by_product, key=revenue_by_product.get)
+    print(f'The product with the highest revenue: {max_revenue_product}')
+
+    max_revenue_date = max(sales_data, key=lambda x: x['price'] * x['units_sold'])
+    print(f'The date with the highest revenue: {max_revenue_date["date"]}, Revenue: {max_revenue_date["price"] * max_revenue_date["units_sold"]}')
+
+    monthly_sales = defaultdict(int)
+    for sale in sales_data:
+        monthly_sales[sale['date'].strftime('%Y-%m')] += sale['price'] * sale['units_sold']
+    months = list(monthly_sales.keys())
+    months.sort()
+    plt.bar(months, [monthly_sales[month] for month in months])
+    plt.xlabel('Month')
+    plt.ylabel('Revenue')
+    plt.title('Monthly Sales')
+    plt.show()
+
+analyze_sales('sales.csv')
+```
+
+**Explanation:** Runs the generated code to validate its correctness and visualize the results.
+
+**Output:**
+
+```
+Total revenue for the year: 35490.0
+Total revenue by product:
+Product P001: 11700.0
+Product P002: 8880.0
+Product P003: 14910.0
+The product with the highest revenue: P003
+The date with the highest revenue: 2023-04-23, Revenue: 2380.0
+```
+
+And displays the monthly sales bar chart:
+
+![Monthly Sales Bar Chart](monthly_sales_chart.png)
+
+**Note:** The bar chart displays the monthly revenue, providing a visual representation of sales performance over the months.
+
+You have now experimented with using the `boto3` SDK, which provides direct access to the Amazon Bedrock API. Using this API, you generated a Python program to analyze and visualize the given sales data.
+
+### Try it Yourself
+
+- Change the prompts to your specific use case and evaluate the output of different models.
+- Play with the token length to understand the latency and responsiveness of the service.
+- Apply different prompt engineering principles to get better outputs.
+
+### Cleanup
+
+You have completed this notebook. To move to the next part of the lab, do the following:
+
+- Close this notebook file and continue with **Task 6**.
+
+---
