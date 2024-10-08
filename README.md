@@ -9,8 +9,9 @@ Developing Generative AI Applications on AWS
 - [Task 3: Advanced NLP Techniques](#task-3-advanced-nlp-techniques)
 - [Task 4: Building an RAG Model](#task-4-building-an-rag-model)
 - [Task 5: Invoke Bedrock Model for Code Generation](#task-5-invoke-bedrock-model-for-code-generation)
-- [Task 6: Bedrock Model Integration with LangChain Agents](#task-6-bedrock-model-integration-with-langchain-agents)
-
+- [Task 6: Chat Bot](#task-6-chat-bot)
+- [Task 7: Code Generation](#task-7-code-generation)
+- [Task 8: LangChain Agents](#task-8-langchain-agents)
 ---
 
 ## Task 1: Data Preparation and Analysis
@@ -819,7 +820,7 @@ Close this notebook and proceed to **Task 4**.
 
 ---
 
-## Task 6: Bedrock Model Integration with LangChain Agents
+## Task 6: Chat Bot
 
 # Task 4: Conversational Interface - Chat with Llama 3 and Titan Premier LLMs
 
@@ -1170,8 +1171,9 @@ You have completed this notebook. Close this notebook file and continue with **T
 
 ---
 
+## Task 7: Code Generation
 
-### Task 5: Invoke Bedrock Model for Code Generation
+# Task 5: Invoke Bedrock Model for Code Generation
 
 In this task, you learn how to use a Large Language Model (LLM) to generate code based on a text prompt.
 
@@ -1496,7 +1498,9 @@ You have completed this notebook. To move to the next part of the lab, do the fo
 
 ---
 
-### Task 6: Bedrock Model Integration with LangChain Agents
+## Task 8: LangChain Agents
+
+# Task 6: Bedrock model integration with Langchain Agents
 
 In this task, you learn how to integrate Amazon Bedrock models with LangChain Agents to build a conversational AI system capable of reasoning and interacting with external tools.
 
