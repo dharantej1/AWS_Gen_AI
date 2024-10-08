@@ -1495,3 +1495,369 @@ You have completed this notebook. To move to the next part of the lab, do the fo
 - Close this notebook file and continue with **Task 6**.
 
 ---
+
+### Task 6: Bedrock Model Integration with LangChain Agents
+
+In this task, you learn how to integrate Amazon Bedrock models with LangChain Agents to build a conversational AI system capable of reasoning and interacting with external tools.
+
+Certain applications require an adaptable sequence of calls to language models and various utilities to answer a user's question. The LangChain Agent interface is flexible and can integrate external tools with an LLM's reasoning. Agents can select the tool to use based on the user input and are capable of using multiple tools, utilizing the output of one tool as the input for the next.
+
+#### Scenario
+
+You are a developer tasked with building an AI assistant that can answer questions about product pricing from a `sales.csv` file. You will use LangChain's agent framework to enable the AI assistant to perform reasoning and interact with external tools (e.g., a calculator and a product price lookup function).
+
+### Task 6.1: Environment Setup
+
+In this task, you set up your environment.
+
+#### Code Cell 1:
+
+```python
+# Import necessary libraries and create a Bedrock client
+import math
+import numexpr
+import json
+import datetime
+import sys
+import os
+import boto3
+
+# Add the module path and create a Bedrock client
+module_path = ".."
+sys.path.append(os.path.abspath(module_path))
+bedrock_client = boto3.client('bedrock-runtime', region_name=os.environ.get("AWS_DEFAULT_REGION", None))
+model_id = "anthropic.claude-3-sonnet-20240229-v1:0"
+```
+
+**Explanation:** Imports the necessary libraries and creates a Bedrock client using Boto3. It sets up the environment for interacting with the Bedrock model.
+
+#### Code Cell 2:
+
+```python
+# Create an instance of ChatBedrock
+from langchain_aws import ChatBedrock
+
+chat_model = ChatBedrock(
+    model_id=model_id,
+    client=bedrock_client
+)
+```
+
+**Explanation:** Creates an instance of LangChain's `ChatBedrock` class, which allows you to interact with a conversational AI model hosted on Amazon Bedrock.
+
+#### Code Cell 3:
+
+```python
+# Invoke the model with a sample question
+response = chat_model.invoke("What is AWS? Answer in a single sentence.")
+print(response)
+```
+
+**Explanation:** Invokes the Bedrock model with a sample question and prints the response.
+
+**Sample Output:**
+
+```
+AIMessage(content='AWS (Amazon Web Services) is a comprehensive cloud computing platform that provides a broad set of global cloud-based products and services for storage, computing, networking, analytics, machine learning, and more.', ...)
+```
+
+### Task 6.2: Synergizing Reasoning and Acting in Language Models Framework
+
+In this task, you utilize the ReAct framework, which enables large language models to interact with external tools to obtain additional information for more accurate and fact-based responses.
+
+Large language models can generate both explanations for their reasoning and task-specific responses in an alternating fashion. Producing reasoning explanations enables the models to infer, monitor, and revise action plans, and even handle unexpected scenarios. The action step allows the models to interface with and obtain information from external sources such as knowledge bases or environments.
+
+#### Code Cell 4:
+
+```python
+from langchain_core.tools import tool
+```
+
+**Explanation:** Imports the `tool` decorator from LangChain, which is used to define external tools that the agent can interact with.
+
+#### Code Cell 5:
+
+```python
+@tool
+def get_product_price(query: str):
+    """Useful when you need to look up product prices."""
+    import csv
+    prices = {}
+    try:
+        with open('sales.csv', 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                prices[row['product_id']] = row['price']
+    except Exception:
+        return f"Unable to look up the price for {query}"
+    product_id = query.strip()
+    price = prices.get(product_id)
+    if price:
+        return f"Price of product {product_id} is {price}\n"
+    else:
+        return f"Price for product {product_id} is not available\n"
+```
+
+**Explanation:** Defines a `get_product_price` function as a tool. This tool reads the `sales.csv` file and retrieves the price of the specified product. It handles exceptions if the file is not found or the product ID does not exist.
+
+#### Code Cell 6:
+
+```python
+@tool
+def calculator(expression: str) -> str:
+    """Use this tool to solve math problems that involve a single-line mathematical expression."""
+    try:
+        result = str(numexpr.evaluate(expression.strip()))
+        return result
+    except Exception:
+        return "Rethink your approach to this calculation"
+```
+
+**Explanation:** Defines a `calculator` function as a tool. This tool evaluates mathematical expressions using the `numexpr` library. It handles exceptions if the expression is invalid.
+
+#### Code Cell 7:
+
+```python
+tools = [get_product_price, calculator]
+```
+
+**Explanation:** Creates a list of tools that the agent can use.
+
+#### Code Cell 8:
+
+```python
+from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, ToolMessage
+
+def output_trace(element: str, trace, node=True):
+    global trace_handle
+    if trace_enabled:
+        print(datetime.datetime.now(), file=trace_handle)
+        print(("Node: " if node else "Edge: ") + element, file=trace_handle)
+        if element == "ask_model_to_reason (entry)":
+            for single_trace in trace:
+                print(single_trace, file=trace_handle)
+        else:
+            print(trace, file=trace_handle)
+        print('----', file=trace_handle)
+
+def consolidate_tool_messages(message):
+    tool_messages = []
+    for msg in message:
+        if isinstance(msg, ToolMessage):
+            tool_messages.append(msg)
+    return tool_messages
+```
+
+**Explanation:** Defines helper functions for tracing and consolidating tool messages. These functions are used for debugging and understanding the agent's reasoning steps.
+
+### Task 6.3: Building an Agent Graph
+
+In this task, you create an agent graph for a conversational AI system that can interact with external tools. The agent graph is a state machine that defines the flow of the conversation and the interaction with the tools.
+
+#### Code Cell 9:
+
+```python
+from typing import Literal
+from langgraph.graph import StateGraph, MessagesState
+from langgraph.prebuilt import ToolNode
+
+# ToolNode runs the tool and appends the tool result to the messages
+tool_node = ToolNode(tools)
+
+# Bind the tools to the chat model
+model_with_tools = chat_model.bind_tools(tools)
+
+# Define the conditional edge function
+def next_step(state: MessagesState) -> Literal["tools", "__end__"]:
+    messages = state["messages"]
+    last_message = messages[-1]
+    if last_message.tool_calls:
+        output_trace("next_step: Proceed to tools", last_message, node=False)
+        return "tools"
+    output_trace("next_step: Proceed to end", last_message, node=False)
+    return "__end__"
+
+# Define the agent node function
+def ask_model_to_reason(state: MessagesState):
+    messages = state["messages"]
+    output_trace("ask_model_to_reason (entry)", consolidate_tool_messages(messages))
+    try:
+        response = model_with_tools.invoke(messages)
+    except Exception as e:
+        output_trace("ask_model_to_reason", messages)
+        output_trace("ask_model_to_reason", "Exception: " + str(e))
+        return {"messages": [messages.append("Unable to invoke the model")]}
+    output_trace("ask_model_to_reason (exit)", response)
+    return {"messages": [response]}
+
+# Create the agent graph
+agent_graph = StateGraph(MessagesState)
+
+# Add nodes to the graph
+agent_graph.add_node("agent", ask_model_to_reason)
+agent_graph.add_node("tools", tool_node)
+
+# Define edges between nodes
+agent_graph.add_edge("__start__", "agent")
+agent_graph.add_edge("tools", "agent")
+agent_graph.add_conditional_edges("agent", next_step)
+
+# Compile the graph
+react_agent = agent_graph.compile()
+```
+
+**Explanation:**
+
+- **ToolNode:** A prebuilt component that runs the tool and appends the tool result to the messages.
+- **model_with_tools:** The chat model with tools bound to it.
+- **next_step:** A function that determines whether to proceed to the tools node or end the conversation based on whether there are tool calls in the last message.
+- **ask_model_to_reason:** A function that invokes the model and handles exceptions.
+- **agent_graph:** The state graph representing the agent's flow.
+- **Edges and Nodes:** Nodes and edges are added to define the flow of the agent graph.
+- **react_agent:** The compiled agent graph ready for execution.
+
+#### Code Cell 10:
+
+```python
+# Visualize the compiled graph
+from IPython.display import Image, display
+
+try:
+    display(Image(react_agent.get_graph().draw_mermaid_png()))
+except Exception:
+    # This requires some extra dependencies and is optional
+    pass
+```
+
+**Explanation:** Attempts to display a visualization of the compiled agent graph. This helps in understanding the flow of the agent's decision-making process.
+
+**Note:** The visualization requires additional dependencies and may not display in all environments.
+
+#### Code Cell 11:
+
+```python
+def print_stream(stream):
+    for s in stream:
+        message = s["messages"][-1]
+        if isinstance(message, tuple):
+            print(message)
+        else:
+            message.pretty_print()
+```
+
+**Explanation:** Defines a helper function to print the messages in the agent's reasoning stream.
+
+### Task 6.4: Testing the Agent
+
+In this task, you test the agent by asking it questions about product pricing from the `sales.csv` file.
+
+#### Code Cell 12:
+
+```python
+# List of questions
+questions = []
+questions.append("How much will it cost to buy 3 units of P002 and 5 units of P003?")
+# You can add more questions as needed
+# questions.append("How many units of P010 can I buy with $200?")
+# questions.append("Can I buy three units of P003 with $200? If not, how much more should I spend to get three units?")
+# questions.append("Prices have gone up by 8%. How many units of P003 could I have purchased before the price increase with $140? How many can I buy after the price increase? Fractional units are not possible.")
+```
+
+**Explanation:** Defines a list of questions to ask the agent. For this demonstration, only one question is uncommented to keep the trace output manageable.
+
+#### Code Cell 13:
+
+```python
+# Enable trace if needed
+trace_enabled = True
+
+if trace_enabled:
+    file_name = "trace_" + str(datetime.datetime.now()) + ".txt"
+    trace_handle = open(file_name, 'w')
+```
+
+**Explanation:** Enables tracing to understand the steps involved in reasoning. The trace output is written to a file.
+
+#### Code Cell 14:
+
+```python
+# Invoke the agent with the questions
+system_message = (
+    "Answer the following questions as best you can. Do not make up an answer. "
+    "Think step by step. Do not perform intermediate math calculations on your own. "
+    "Use the calculator tool provided for math calculations."
+)
+
+for q in questions:
+    inputs = {"messages": [("system", system_message), ("user", q)]}
+    config = {"recursion_limit": 15}
+    print_stream(react_agent.stream(inputs, config, stream_mode="values"))
+    print("\n" + "================================ Answer complete =================================" + "\n")
+
+if trace_enabled:
+    trace_handle.close()
+```
+
+**Explanation:**
+
+- **system_message:** Provides instructions to the agent on how to approach the questions.
+- **Invocation:** The agent is invoked with each question, and the responses are printed using the `print_stream` function.
+- **Trace Handling:** Closes the trace file if tracing is enabled.
+
+**Sample Output:**
+
+```
+================================ Human Message =================================
+
+How much will it cost to buy 3 units of P002 and 5 units of P003?
+================================== Ai Message ==================================
+Tool Calls:
+  get_product_price
+    Args:
+      query: P002
+================================= Tool Message =================================
+Name: get_product_price
+
+Price of product P002 is 60
+
+================================== Ai Message ==================================
+Tool Calls:
+  get_product_price
+    Args:
+      query: P003
+================================= Tool Message =================================
+Name: get_product_price
+
+Price of product P003 is 70
+
+================================== Ai Message ==================================
+Tool Calls:
+  calculator
+    Args:
+      expression: (3 * 60) + (5 * 70)
+================================= Tool Message =================================
+Name: calculator
+
+530
+================================== Ai Message ==================================
+
+To calculate the total cost of buying 3 units of P002 and 5 units of P003:
+
+1. I looked up the price of P002, which is 60.
+2. I looked up the price of P003, which is 70.
+3. I used the calculator to calculate the total cost: (3 * 60 for the 3 units of P002) + (5 * 70 for the 5 units of P003) = 530
+
+Therefore, the total cost to buy 3 units of P002 and 5 units of P003 is 530.
+
+================================ Answer complete =================================
+```
+
+**Explanation:** The agent successfully retrieves the prices using the `get_product_price` tool, performs the calculation using the `calculator` tool, and provides a step-by-step answer.
+
+### Try it Yourself
+
+- Modify the list of questions to test different scenarios and evaluate the agent's responses.
+- Experiment with enabling and disabling tracing to understand the agent's reasoning steps.
+- Explore adding more tools or modifying existing ones to enhance the agent's capabilities.
+
+---
