@@ -1,7 +1,5 @@
-# AWS_Gen_AI
+# AWS_Gen_AI - Notebooks Detailed Explanations
 Developing Generative AI Applications on AWS
-
-# Notebooks Detailed Explanations
 
 ## Index
 - [Task 1a: Perform Text Generation](#task-1a-perform-text-generation)
@@ -12,7 +10,8 @@ Developing Generative AI Applications on AWS
 - [Task 4: Conversational Interface - Chat with Llama 3 and Titan Premier LLMs](#task-4-conversational-interface---chat-with-llama-3-and-titan-premier-llms)
 - [Task 5: Invoke Bedrock model for code generation](#task-5-invoke-bedrock-model-for-code-generation)
 - [Task 6: Bedrock model integration with Langchain Agents](#task-6-bedrock-model-integration-with-langchain-agents)
----
+
+<!-- --- -->
 
 ## Task 1a: Perform Text Generation
 
@@ -177,7 +176,7 @@ You have completed this notebook. To move to the next part of the lab, do the fo
 
 - Close this notebook file and continue with **Task1b.ipynb**.
 
----
+<!-- --- -->
 
 ## Task 1b: Perform Text Generation Using a Prompt That Includes Context 
 
@@ -332,7 +331,7 @@ You have completed this notebook. To move to the next part of the lab, do the fo
 - Close this notebook file.
 - Return to the lab session and continue with **Task 2**.
 
----
+<!-- --- -->
 
 ## Task 2a: Text Summarization with Small Files Using Titan Text Premier
 
@@ -504,7 +503,7 @@ You have completed this notebook. To move to the next part of the lab, do the fo
 
 - Close this notebook file and continue with **Task2b.ipynb**.
 
----
+<!-- --- -->
 
 ## Task 2b: Abstractive Text Summarization
 
@@ -647,7 +646,7 @@ print(output['output_text'])
 
 You have completed this notebook. Close this notebook and proceed to **Task 3**.
 
----
+<!-- --- -->
 
 ## Task 3: Use Amazon Bedrock for Question Answering
 
@@ -808,7 +807,7 @@ if stream:
 
 Close this notebook and proceed to **Task 4**.
 
----
+<!-- --- -->
 
 ## Task 4: Conversational Interface - Chat with Llama 3 and Titan Premier LLMs
 
@@ -1157,7 +1156,7 @@ chat.start_chat()  # Only answers will be shown here, and not the citations
 
 You have completed this notebook. Close this notebook file and continue with **Task 5**.
 
----
+<!-- --- -->
 
 ## Task 5: Invoke Bedrock Model for Code Generation
 
@@ -1482,7 +1481,7 @@ You have completed this notebook. To move to the next part of the lab, do the fo
 
 - Close this notebook file and continue with **Task 6**.
 
----
+<!-- --- -->
 
 ## Task 6: Bedrock model integration with Langchain Agents
 
@@ -1848,4 +1847,4 @@ Therefore, the total cost to buy 3 units of P002 and 5 units of P003 is 530.
 - Experiment with enabling and disabling tracing to understand the agent's reasoning steps.
 - Explore adding more tools or modifying existing ones to enhance the agent's capabilities.
 
----
+<!-- --- -->
