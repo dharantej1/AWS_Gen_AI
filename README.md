@@ -333,7 +333,7 @@ You have completed this notebook. To move to the next part of the lab, do the fo
 
 <!-- --- -->
 
-## Task 2a: Text Summarization with Small Files Using Titan Text Premier
+## Task 2a: Text summarization with small files with Titan Text Premier
 
 In this notebook, you ingest a small string of text directly into the Amazon Bedrock API (using the Titan Text model) and instruct it to summarize the input text. You can apply this approach to summarize call transcripts, meeting transcripts, books, articles, blog posts, and other relevant content when the input text length is within the context size limits of the model.
 
