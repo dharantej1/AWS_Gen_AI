@@ -4,19 +4,17 @@ Developing Generative AI Applications on AWS
 # Notebooks Detailed Explanations
 
 ## Index
-- [Task 1a: Data Preparation and Analysis](#task-1a-data-preparation-and-analysis)
-- [Task 1b: Text Data Preprocessing](#task-1b-text-data-preprocessing)
-- [Task 2a: Advanced NLP Techniques](#task-2a-advanced-nlp-techniques)
-- [Task 2b: Building an RAG Model](#task-2b-building-an-rag-model)
-- [Task 3: Invoke Bedrock Model for Code Generation](#task-3-invoke-bedrock-model-for-code-generation)
-- [Task 4: Chat Bot](#task-4-chat-bot)
-- [Task 5: Code Generation](#task-5-code-generation)
-- [Task 6: LangChain Agents](#task-6-langchain-agents)
+- [Task 1a: Perform Text Generation](#task-1a-perform-text-generation)
+- [Task 1b: Perform Text Generation using a prompt that includes Context](#task-1b-perform-text-generation-using-a-prompt-that-includes-context)
+- [Task 2a: Text summarization with small files with Titan Text Premier](#task-2a-text-summarization-with-small-files-with-titan-text-premier)
+- [Task 2b: Abstractive Text Summarization](#task-2b-abstractive-text-summarization)
+- [Task 3: Use Amazon Bedrock for Question Answering](#task-3-use-amazon-bedrock-for-question-answering)
+- [Task 4: Conversational Interface - Chat with Llama 3 and Titan Premier LLMs](#task-4-conversational-interface---chat-with-llama-3-and-titan-premier-llms)
+- [Task 5: Invoke Bedrock model for code generation](#task-5-invoke-bedrock-model-for-code-generation)
+- [Task 6: Bedrock model integration with Langchain Agents](#task-6-bedrock-model-integration-with-langchain-agents)
 ---
 
-## Task 1a: Data Preparation and Analysis
-
-# Task 1a: Perform Text Generation
+## Task 1a: Perform Text Generation
 
 In this notebook, you learn how to use a Large Language Model (LLM) to generate an email response to a customer who provided negative feedback on the quality of customer service they received from the support engineer. You generate an email with a thank-you note based on the customer's previous email. You use the Amazon Titan model through the Amazon Bedrock API with the Boto3 client.
 
@@ -181,9 +179,7 @@ You have completed this notebook. To move to the next part of the lab, do the fo
 
 ---
 
-## Task 1b: Text Data Preprocessing
-
-# Task 1b: Perform Text Generation Using a Prompt That Includes Context
+## Task 1b: Perform Text Generation Using a Prompt That Includes Context 
 
 In this notebook, you learn how to generate an email response to a customer who was not happy with the quality of customer service they received from the customer support engineer. You provide additional context to the model by including the contents of the actual email received from the unhappy customer.
 
@@ -338,9 +334,7 @@ You have completed this notebook. To move to the next part of the lab, do the fo
 
 ---
 
-## Task 2a: Advanced NLP Techniques
-
-# Task 2a: Text Summarization with Small Files Using Titan Text Premier
+## Task 2a: Text Summarization with Small Files Using Titan Text Premier
 
 In this notebook, you ingest a small string of text directly into the Amazon Bedrock API (using the Titan Text model) and instruct it to summarize the input text. You can apply this approach to summarize call transcripts, meeting transcripts, books, articles, blog posts, and other relevant content when the input text length is within the context size limits of the model.
 
@@ -512,9 +506,7 @@ You have completed this notebook. To move to the next part of the lab, do the fo
 
 ---
 
-## Task 2b: Building an RAG Model
-
-# Task 2b: Abstractive Text Summarization
+## Task 2b: Abstractive Text Summarization
 
 In this notebook, you manage challenges arising in large document summarization—input text can exceed model context lengths, generate hallucinated outputs, or trigger out-of-memory errors.
 
@@ -657,9 +649,7 @@ You have completed this notebook. Close this notebook and proceed to **Task 3**.
 
 ---
 
-## Task 3: Invoke Bedrock Model for Code Generation
-
-# Task 3: Use Amazon Bedrock for Question Answering
+## Task 3: Use Amazon Bedrock for Question Answering
 
 In this notebook, you use the Bedrock Titan model to answer questions by providing the relevant context within the prompt. This approach addresses the challenge of returning factual answers without needing to index documents beforehand.
 
@@ -820,9 +810,7 @@ Close this notebook and proceed to **Task 4**.
 
 ---
 
-## Task 4: Chat Bot
-
-# Task 4: Conversational Interface - Chat with Llama 3 and Titan Premier LLMs
+## Task 4: Conversational Interface - Chat with Llama 3 and Titan Premier LLMs
 
 In this notebook, you build a chatbot using the `llama3-8b-instruct` and `titan-text-premier` Foundation Models (FMs) in Amazon Bedrock.
 
@@ -1171,9 +1159,7 @@ You have completed this notebook. Close this notebook file and continue with **T
 
 ---
 
-## Task 5: Code Generation
-
-# Task 5: Invoke Bedrock Model for Code Generation
+## Task 5: Invoke Bedrock Model for Code Generation
 
 In this task, you learn how to use a Large Language Model (LLM) to generate code based on a text prompt.
 
@@ -1498,9 +1484,7 @@ You have completed this notebook. To move to the next part of the lab, do the fo
 
 ---
 
-## Task 6: LangChain Agents
-
-# Task 6: Bedrock model integration with Langchain Agents
+## Task 6: Bedrock model integration with Langchain Agents
 
 In this task, you learn how to integrate Amazon Bedrock models with LangChain Agents to build a conversational AI system capable of reasoning and interacting with external tools.
 
