@@ -1170,13 +1170,14 @@ You have completed this notebook. Close this notebook file and continue with **T
 
 ---
 
+
 ### Task 5: Invoke Bedrock Model for Code Generation
 
-In this notebook, you learn how to use a Large Language Model (LLM) to generate code based on a text prompt.
+In this task, you learn how to use a Large Language Model (LLM) to generate code based on a text prompt.
 
-The prompt used in this notebook is a zero-shot prompt, as we are not providing any examples of text other than the prompt itself.
+The prompt used in this notebook is a zero-shot prompt, as we are not providing any examples other than the prompt itself.
 
-To demonstrate the code generation capability of models in Amazon Bedrock, you take the use case of code generation. You explore using the Boto3 client to communicate with the Amazon Bedrock API and provide the API with an input consisting of a task, an instruction, and an input for the model to generate an output without providing any additional example. The purpose here is to demonstrate how powerful LLMs can understand the task at hand and generate compelling outputs.
+To demonstrate the code generation capability of models in Amazon Bedrock, you take the use case of analyzing sales data. You explore using the Boto3 client to communicate with the Amazon Bedrock API and provide the API with an input consisting of a task and instructions for the model to generate code without any additional examples. This demonstrates how powerful LLMs can understand the task at hand and generate compelling outputs.
 
 #### Scenario
 
@@ -1262,6 +1263,7 @@ print("sales.csv has been created!")
 **Explanation:** Creates a sample `sales.csv` file with sales data to be used in this lab.
 
 **Output:**
+
 ```
 sales.csv has been created!
 ```
@@ -1274,16 +1276,18 @@ sales.csv has been created!
 # Define prompt template
 from langchain_core.prompts import PromptTemplate
 
-def format_prompt(actor: str, input: str):
-    match actor:
-        case "user":
-            prompt_template =  """<|begin_of_text|><|start_header_id|>{actor}<|end_header_id|>\n\n{input}<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\n
+def format_prompt(actor: str, input_text: str):
+    if actor == "user":
+        prompt_template = """<|begin_of_text|><|start_header_id|>{actor}<|end_header_id|>
+
+{input}<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+
 """
-            prompt = PromptTemplate.from_template(prompt_template)
-            return prompt.format(actor=actor, input=input)
-        case _:
-            print("requested actor >" + actor + "< is not supported")
-            return ""   
+        prompt = PromptTemplate.from_template(prompt_template)
+        return prompt.format(actor=actor, input=input_text)
+    else:
+        print(f"Requested actor >{actor}< is not supported")
+        return ""
 ```
 
 **Explanation:** Defines a function to format the prompt appropriately for the Bedrock model, using a prompt template.
@@ -1302,15 +1306,15 @@ You have a CSV, sales.csv, with columns:
 - price
 - units_sold
 
-Create a python program to analyze the sales data from a CSV file. The program should be able to read the data, and determine below:
+Create a python program to analyze the sales data from a CSV file. The program should be able to read the data and determine the following:
 
 - Total revenue for the year
-- Total revenue by product 
-- The product with the highest revenue 
+- Total revenue by product
+- The product with the highest revenue
 - The date with the highest revenue and the revenue achieved on that date
 - Visualize monthly sales using a bar chart
 
-Ensure the code is syntactically correct, bug-free, optimized, not span multiple lines unnecessarily, and prefer to use standard libraries. Return only python code without any surrounding text, explanation, or context.
+Ensure the code is syntactically correct, bug-free, optimized, does not span multiple lines unnecessarily, and prefers to use standard libraries. Return only Python code without any surrounding text, explanation, or context.
 
 """
 prompt = format_prompt("user", prompt_data)
@@ -1321,6 +1325,7 @@ prompt = format_prompt("user", prompt_data)
 #### Code Cell 5:
 
 ```python
+# Prepare the request body
 body = json.dumps({
     "prompt": prompt,
     "max_gen_len": 2048,
@@ -1336,11 +1341,12 @@ body = json.dumps({
 #### Code Cell 6:
 
 ```python
+# Invoke the model
 modelId = "meta.llama3-8b-instruct-v1:0"
 response = bedrock_client.invoke_model(body=body, modelId=modelId)
 response_body = json.loads(response.get('body').read())
-output_list = response_body.get("generation", [])
-print(output_list)
+output = response_body.get("generation", "")
+print(output)
 ```
 
 **Explanation:** Invokes the Bedrock model using the Boto3 client, passing in the prompt, and prints the generated code.
@@ -1348,7 +1354,6 @@ print(output_list)
 **Output:**
 
 ```python
-```
 import csv
 import datetime
 import matplotlib.pyplot as plt
@@ -1369,7 +1374,7 @@ def analyze_sales(file_name):
     total_revenue = sum(sale['price'] * sale['units_sold'] for sale in sales_data)
     print(f'Total revenue for the year: {total_revenue}')
 
-    revenue_by_product = defaultdict(int)
+    revenue_by_product = defaultdict(float)
     for sale in sales_data:
         revenue_by_product[sale['product_id']] += sale['price'] * sale['units_sold']
     print('Total revenue by product:')
@@ -1380,14 +1385,16 @@ def analyze_sales(file_name):
     print(f'The product with the highest revenue: {max_revenue_product}')
 
     max_revenue_date = max(sales_data, key=lambda x: x['price'] * x['units_sold'])
-    print(f'The date with the highest revenue: {max_revenue_date["date"]}, Revenue: {max_revenue_date["price"] * max_revenue_date["units_sold"]}')
+    max_revenue_amount = max_revenue_date['price'] * max_revenue_date['units_sold']
+    print(f'The date with the highest revenue: {max_revenue_date["date"]}, Revenue: {max_revenue_amount}')
 
-    monthly_sales = defaultdict(int)
+    monthly_sales = defaultdict(float)
     for sale in sales_data:
-        monthly_sales[sale['date'].strftime('%Y-%m')] += sale['price'] * sale['units_sold']
-    months = list(monthly_sales.keys())
-    months.sort()
-    plt.bar(months, [monthly_sales[month] for month in months])
+        month = sale['date'].strftime('%Y-%m')
+        monthly_sales[month] += sale['price'] * sale['units_sold']
+    months = sorted(monthly_sales.keys())
+    revenues = [monthly_sales[month] for month in months]
+    plt.bar(months, revenues)
     plt.xlabel('Month')
     plt.ylabel('Revenue')
     plt.title('Monthly Sales')
@@ -1395,13 +1402,15 @@ def analyze_sales(file_name):
 
 analyze_sales('sales.csv')
 ```
-```
 
-#### (Optional) Copy the generated code from the printed output and run the Bedrock generated code in the cell below for validation.
+**Note:** The generated code is intended to read the `sales.csv` file, perform the required analyses, and visualize the monthly sales using a bar chart.
+
+### Task 5.5: Validate the Generated Code
 
 #### Code Cell 7:
 
 ```python
+# Run the generated code to validate it
 import csv
 import datetime
 import matplotlib.pyplot as plt
@@ -1422,7 +1431,7 @@ def analyze_sales(file_name):
     total_revenue = sum(sale['price'] * sale['units_sold'] for sale in sales_data)
     print(f'Total revenue for the year: {total_revenue}')
 
-    revenue_by_product = defaultdict(int)
+    revenue_by_product = defaultdict(float)
     for sale in sales_data:
         revenue_by_product[sale['product_id']] += sale['price'] * sale['units_sold']
     print('Total revenue by product:')
@@ -1433,14 +1442,16 @@ def analyze_sales(file_name):
     print(f'The product with the highest revenue: {max_revenue_product}')
 
     max_revenue_date = max(sales_data, key=lambda x: x['price'] * x['units_sold'])
-    print(f'The date with the highest revenue: {max_revenue_date["date"]}, Revenue: {max_revenue_date["price"] * max_revenue_date["units_sold"]}')
+    max_revenue_amount = max_revenue_date['price'] * max_revenue_date['units_sold']
+    print(f'The date with the highest revenue: {max_revenue_date['date']}, Revenue: {max_revenue_amount}')
 
-    monthly_sales = defaultdict(int)
+    monthly_sales = defaultdict(float)
     for sale in sales_data:
-        monthly_sales[sale['date'].strftime('%Y-%m')] += sale['price'] * sale['units_sold']
-    months = list(monthly_sales.keys())
-    months.sort()
-    plt.bar(months, [monthly_sales[month] for month in months])
+        month = sale['date'].strftime('%Y-%m')
+        monthly_sales[month] += sale['price'] * sale['units_sold']
+    months = sorted(monthly_sales.keys())
+    revenues = [monthly_sales[month] for month in months]
+    plt.bar(months, revenues)
     plt.xlabel('Month')
     plt.ylabel('Revenue')
     plt.title('Monthly Sales')
