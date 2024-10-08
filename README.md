@@ -4,17 +4,17 @@ Developing Generative AI Applications on AWS
 # Notebooks Detailed Explanations
 
 ## Index
-- [Task 1: Data Preparation and Analysis](#task-1-data-preparation-and-analysis)
-- [Task 2: Text Data Preprocessing](#task-2-text-data-preprocessing)
-- [Task 3: Advanced NLP Techniques](#task-3-advanced-nlp-techniques)
-- [Task 4: Building an RAG Model](#task-4-building-an-rag-model)
-- [Task 5: Invoke Bedrock Model for Code Generation](#task-5-invoke-bedrock-model-for-code-generation)
-- [Task 6: Chat Bot](#task-6-chat-bot)
-- [Task 7: Code Generation](#task-7-code-generation)
-- [Task 8: LangChain Agents](#task-8-langchain-agents)
+- [Task 1a: Data Preparation and Analysis](#task-1a-data-preparation-and-analysis)
+- [Task 1b: Text Data Preprocessing](#task-1b-text-data-preprocessing)
+- [Task 2a: Advanced NLP Techniques](#task-2a-advanced-nlp-techniques)
+- [Task 2b: Building an RAG Model](#task-2b-building-an-rag-model)
+- [Task 3: Invoke Bedrock Model for Code Generation](#task-3-invoke-bedrock-model-for-code-generation)
+- [Task 4: Chat Bot](#task-4-chat-bot)
+- [Task 5: Code Generation](#task-5-code-generation)
+- [Task 6: LangChain Agents](#task-6-langchain-agents)
 ---
 
-## Task 1: Data Preparation and Analysis
+## Task 1a: Data Preparation and Analysis
 
 # Task 1a: Perform Text Generation
 
@@ -181,7 +181,7 @@ You have completed this notebook. To move to the next part of the lab, do the fo
 
 ---
 
-## Task 2: Text Data Preprocessing
+## Task 1b: Text Data Preprocessing
 
 # Task 1b: Perform Text Generation Using a Prompt That Includes Context
 
@@ -338,7 +338,7 @@ You have completed this notebook. To move to the next part of the lab, do the fo
 
 ---
 
-## Task 3: Advanced NLP Techniques
+## Task 2a: Advanced NLP Techniques
 
 # Task 2a: Text Summarization with Small Files Using Titan Text Premier
 
@@ -512,7 +512,7 @@ You have completed this notebook. To move to the next part of the lab, do the fo
 
 ---
 
-## Task 4: Building an RAG Model
+## Task 2b: Building an RAG Model
 
 # Task 2b: Abstractive Text Summarization
 
@@ -657,7 +657,7 @@ You have completed this notebook. Close this notebook and proceed to **Task 3**.
 
 ---
 
-## Task 5: Invoke Bedrock Model for Code Generation
+## Task 3: Invoke Bedrock Model for Code Generation
 
 # Task 3: Use Amazon Bedrock for Question Answering
 
@@ -820,7 +820,7 @@ Close this notebook and proceed to **Task 4**.
 
 ---
 
-## Task 6: Chat Bot
+## Task 4: Chat Bot
 
 # Task 4: Conversational Interface - Chat with Llama 3 and Titan Premier LLMs
 
@@ -1171,7 +1171,7 @@ You have completed this notebook. Close this notebook file and continue with **T
 
 ---
 
-## Task 7: Code Generation
+## Task 5: Code Generation
 
 # Task 5: Invoke Bedrock Model for Code Generation
 
@@ -1498,7 +1498,7 @@ You have completed this notebook. To move to the next part of the lab, do the fo
 
 ---
 
-## Task 8: LangChain Agents
+## Task 6: LangChain Agents
 
 # Task 6: Bedrock model integration with Langchain Agents
 
