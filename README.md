@@ -3,7 +3,7 @@ Developing Generative AI Applications on AWS
 
 # Notebooks Detailed Explanations
 
-## Interactive Index
+## Index
 - [Task 1: Data Preparation and Analysis](#task-1-data-preparation-and-analysis)
 - [Task 2: Text Data Preprocessing](#task-2-text-data-preprocessing)
 - [Task 3: Advanced NLP Techniques](#task-3-advanced-nlp-techniques)
